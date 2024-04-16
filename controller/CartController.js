@@ -1,5 +1,3 @@
-// 김민진
-
 const conn = require('../mariadb');
 const { StatusCodes } = require('http-status-codes');
 
@@ -19,8 +17,6 @@ const addToCart = (req, res) => {
             res.status(StatusCodes.CREATED).json(results);
         });
 }
-
-// 김민진
 
 // 장바구니 아이템 목록 조회, 선택한 상품 조회
 const getCartItems = (req, res) => {
@@ -48,8 +44,6 @@ const getCartItems = (req, res) => {
             return res.status(StatusCodes.OK).json(results);
         });
 }
-
-// 김민진
 
 // 장바구니 아이템 삭제
 const removeCartItem = (req, res) => {
