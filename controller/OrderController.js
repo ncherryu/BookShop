@@ -1,49 +1,43 @@
-const conn = require('../mariadb');
+// const conn = require('../mariadb');
+const mariadb = require('mysql2/promise');
 const { StatusCodes } = require('http-status-codes');
 
-const order = (req, res) => {
-    const { items, delivery, totalQuantity, totalPrice, userId, firstBookTitle } = req.body;
-    let deliveryId;
-    let orderId;
+const order = async (req, res) => {
+    const conn = await mariadb.createConnection({
+        host: 'localhost',
+        user: 'root',
+        database: 'Bookshop',
+        password: 'root',
+        dateStrings: true
+    });
 
+    const { items, delivery, totalQuantity, totalPrice, userId, firstBookTitle } = req.body;
+    let deliveryId, orderId;
+
+    // delivery 테이블 삽입
     let sql = `INSERT INTO delivery (address, receiver, contact) 
                     VALUES (?, ?, ?)`;
     let values = [delivery.address, delivery.receiver, delivery.contact];
-    conn.query(sql, values,
-        (err, results) => {
-            if (err) {
-                console.log(err);
-                return res.status(StatusCodes.BAD_REQUEST).end();
-            }
+    let [results] = await conn.query(sql, values);
+    deliveryId = results.insertId;
 
-            deliveryId = results.insertId;
-        });
-
+    // orders 테이블 삽입
     sql = `INSERT INTO orders (book_title, total_quantity, total_price, user_id, delivery_id) 
-                VALUES (?, ?, ?, ?, ?)`
+                VALUES (?, ?, ?, ?, ?)`;
     values = [firstBookTitle, totalQuantity, totalPrice, userId, deliveryId];
-    conn.query(sql, values,
-        (err, results) => {
-            if (err) {
-                console.log(err);
-                return res.status(StatusCodes.BAD_REQUEST).end();
-            }
-            orderId = results.insertId;
-        });
+    [results] = await conn.query(sql, values);
+    orderId = results.insertId;
 
+    // orderedBook 테이블 삽입
     sql = `INSERT INTO orderedBook (order_id, book_id, quantity) VALUES ?`;
     values = [];
     items.forEach((item) => {
         values.push([orderId, item.bookId, item.quantity]);
     });
-    conn.query(sql, [values],
-        (err, results) => {
-            if (err) {
-                console.log(err);
-                return res.status(StatusCodes.BAD_REQUEST).end();
-            }
-            res.status(StatusCodes.CREATED).json(results);
-        })
+    [results] = await conn.query(sql, [values]);
+
+    // 응답 전송
+    res.status(StatusCodes.CREATED).json(results);
 };
 
 const getOrders = (req, res) => {
