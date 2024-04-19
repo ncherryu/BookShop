@@ -2,11 +2,10 @@ const conn = require('../mariadb');
 const { StatusCodes } = require('http-status-codes');
 
 const allBooks = (req, res) => {
-    let { category_id, news, limit, currentPage } = req.query;
-    let offset = limit * (currentPage - 1);
+    let { category_id, news, limit, current_page } = req.query;
+    let offset = limit * (current_page - 1);
 
-    // let sql = `SELECT * FROM books LEFT JOIN category 
-    //                 ON books.category_id = category.id `;
+    // let sql = `SELECT * FROM books LEFT JOIN category ON books.category_id = category.id `;
     let sql = `SELECT *, (SELECT COUNT(*) FROM likes WHERE liked_book_id = books.id) AS likes FROM books `;
     let values = [];
 
@@ -39,7 +38,7 @@ const allBooks = (req, res) => {
 
 const bookDetail = (req, res) => {
     let bookId = parseInt(req.params.id);
-    const userId = parseInt(req.body.userId);
+    const userId = parseInt(req.body.user_id);
 
     const sql = `SELECT *,
 	                (SELECT COUNT(*) FROM likes WHERE liked_book_id = books.id)  AS likes,

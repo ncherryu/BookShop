@@ -77,7 +77,7 @@ const passwordResetRequest = (req, res) => {
 
             const user = results[0];
             if (user) {
-                return res.status(StatusCodes.OK).jaon({
+                return res.status(StatusCodes.OK).json({
                     email: email
                 });
             } else {

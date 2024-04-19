@@ -1,12 +1,10 @@
-// 김민진
-
 const conn = require('../mariadb');
 const { StatusCodes } = require('http-status-codes');
 
 // 좋아요 추가
 const addLike = (req, res) => {
     const bookId = parseInt(req.params.id);
-    const userId = parseInt(req.body.userId);
+    const userId = parseInt(req.body.user_id);
 
     const sql = `INSERT INTO likes (user_id, liked_book_id) VALUES (?, ?)`;
     const values = [userId, bookId];
@@ -21,12 +19,10 @@ const addLike = (req, res) => {
         });
 };
 
-// 김민진
-
 // 좋아요 삭제
 const removeLike = (req, res) => {
     const bookId = parseInt(req.params.id);
-    const userId = parseInt(req.body.userId);
+    const userId = parseInt(req.body.user_id);
 
     const sql = `DELETE FROM likes WHERE user_id = ? and liked_book_id = ?`;
     const values = [userId, bookId];

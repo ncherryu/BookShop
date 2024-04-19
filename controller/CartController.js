@@ -3,7 +3,9 @@ const { StatusCodes } = require('http-status-codes');
 
 // 장바구니 담기
 const addToCart = (req, res) => {
-    const { bookId, quantity, userId } = req.body;
+    const bookId = parseInt(req.body.book_id);
+    const quantity = parseInt(req.body.quantity);
+    const userId = parseInt(req.body.user_id);
 
     const sql = `INSERT INTO cartItems (book_id, quantity, user_id) VALUES (?, ?, ?)`;
     const values = [bookId, quantity, userId];
@@ -20,7 +22,7 @@ const addToCart = (req, res) => {
 
 // 장바구니 아이템 목록 조회, 선택한 상품 조회
 const getCartItems = (req, res) => {
-    const userId = parseInt(req.body.userId);
+    const userId = parseInt(req.body.user_id);
     const { selected } = req.body;
 
     let sql = `SELECT cartItems.id, book_id, title, summary, quantity, price 
