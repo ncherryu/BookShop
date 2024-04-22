@@ -46,7 +46,7 @@ const login = (req, res) => {
                     id: loginUser.id,
                     email: loginUser.email
                 }, process.env.PRIVATE_KEY, {
-                    expiresIn: '1s', // payload에 exp 항목과 iss 항목이 생김. 토큰 유효 기간과 발행자를 의미
+                    expiresIn: '30m', // payload에 exp 항목과 iss 항목이 생김. 토큰 유효 기간과 발행자를 의미
                     issuer: 'minjin'
                 });
 

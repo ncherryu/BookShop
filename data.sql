@@ -87,3 +87,21 @@ SELECT last_insert_id();
 
 /* 결제된 도서 장바구니 삭제 */
 DELETE FROM cartItems WHERE id IN (1,2,3); 
+
+/* 전체 도서 조회 */
+/* 전체 도서 조회 기존 SQL */
+SELECT *, 
+    (SELECT COUNT(*) FROM likes WHERE liked_book_id = books.id) AS likes,
+    (SELECT COUNT(*) FROM orderedBook WHERE orderedBook.book_id = books.id) AS orders 
+    FROM books;
+
+/* 전체 도서 조회 조인 버전 */
+SELECT * FROM books LEFT JOIN category ON books.category_id = category.id;
+
+/* 전체 도서 조회 정렬 */
+SELECT all_books.*
+    FROM (SELECT *,
+            (SELECT COUNT(*) FROM likes WHERE liked_book_id = books.id) AS likes,
+            (SELECT COUNT(*) FROM orderedBook WHERE orderedBook.book_id = books.id) AS orders 
+            FROM books) all_books
+    ORDER BY all_books.likes DESC;

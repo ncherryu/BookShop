@@ -2,24 +2,31 @@ const conn = require('../mariadb');
 const { StatusCodes } = require('http-status-codes');
 
 const allBooks = (req, res) => {
-    let { category_id, news, limit, current_page } = req.query;
+    let { category_id, news, limit, current_page, sort } = req.query;
     let offset = limit * (current_page - 1);
 
-    // let sql = `SELECT * FROM books LEFT JOIN category ON books.category_id = category.id `;
-    let sql = `SELECT *, (SELECT COUNT(*) FROM likes WHERE liked_book_id = books.id) AS likes FROM books `;
+    let sql = `SELECT all_books.*
+                    FROM (SELECT *,
+                            (SELECT COUNT(*) FROM likes WHERE liked_book_id = books.id) AS likes,
+                            (SELECT COUNT(*) FROM orderedBook WHERE orderedBook.book_id = books.id) AS orders 
+                            FROM books) all_books `;
     let values = [];
 
     if (category_id && news) {
-        sql += `WHERE category_id = ? AND pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()`;
+        sql += `WHERE category_id = ? AND pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW() `;
         values = [parseInt(category_id)];
     } else if (category_id) {
-        sql += `WHERE category_id = ?`;
+        sql += `WHERE category_id = ? `;
         values = [parseInt(category_id)];
     } else if (news) {
-        sql = `WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()`
+        sql = `WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW() `
     }
 
-    sql += ` LIMIT ? OFFSET ?`;
+    if (sort) { // likes, orders, pub_date
+        sql += `ORDER BY all_books.${sort} DESC `;
+    }
+
+    sql += `LIMIT ? OFFSET ?`;
     values.push(parseInt(limit), offset);
     conn.query(sql, values,
         (err, results) => {
@@ -29,10 +36,10 @@ const allBooks = (req, res) => {
             }
 
             if (results.length) {
-                results.map((result) => {
-                    result.pubDate = result.pub_date;
-                    delete result.pub_date;
-                })
+                // results.map((result) => {
+                //     result.pubDate = result.pub_date;
+                //     delete result.pub_date;
+                // })
                 return res.status(StatusCodes.OK).json(results);
             } else {
                 return res.status(StatusCodes.NOT_FOUND).end();
