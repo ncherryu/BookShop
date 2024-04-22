@@ -1,13 +1,14 @@
 const conn = require('../mariadb');
 const { StatusCodes } = require('http-status-codes');
+const { ensureAuthorization } = require('../jwtAuthorization');
 
-// 좋아요 추가
 const addLike = (req, res) => {
     const bookId = parseInt(req.params.id);
-    const userId = parseInt(req.body.user_id);
+
+    const authorization = ensureAuthorization(req);
 
     const sql = `INSERT INTO likes (user_id, liked_book_id) VALUES (?, ?)`;
-    const values = [userId, bookId];
+    const values = [authorization.id, bookId];
     conn.query(sql, values,
         (err, results) => {
             if (err) {
@@ -19,13 +20,13 @@ const addLike = (req, res) => {
         });
 };
 
-// 좋아요 삭제
 const removeLike = (req, res) => {
     const bookId = parseInt(req.params.id);
-    const userId = parseInt(req.body.user_id);
+
+    const authorization = ensureAuthorization(req);
 
     const sql = `DELETE FROM likes WHERE user_id = ? and liked_book_id = ?`;
-    const values = [userId, bookId];
+    const values = [authorization.id, bookId];
     conn.query(sql, values,
         (err, results) => {
             if (err) {

@@ -29,6 +29,10 @@ const allBooks = (req, res) => {
             }
 
             if (results.length) {
+                results.map((result) => {
+                    result.pubDate = result.pub_date;
+                    delete result.pub_date;
+                })
                 return res.status(StatusCodes.OK).json(results);
             } else {
                 return res.status(StatusCodes.NOT_FOUND).end();

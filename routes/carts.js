@@ -1,20 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const { addToCart, getCartItems, removeCartItem } = require('../controller/CartController')
+const { addToCart, getCartItems, removeCartItem } = require('../controller/CartController');
 const {
     bookIdValidate,
-    userIdValidate,
     cartIdValidate,
     quantityValidate,
     validate
-} = require('../validator/CartValidator')
+} = require('../validator/CartValidator');
+const { validateToken } = require('../jwtAuthorization');
 
 router.use(express.json());
 
 // 장바구니 담기
 router.post(
     '/',
-    [bookIdValidate, userIdValidate, quantityValidate, validate],
+    [validateToken, bookIdValidate, quantityValidate, validate],
     addToCart
 );
 
@@ -22,7 +22,7 @@ router.post(
 // 선택한 장바구니 상품 목록 조회
 router.get(
     '/',
-    [userIdValidate, validate],
+    [validateToken, validate],
     getCartItems
 );
 
