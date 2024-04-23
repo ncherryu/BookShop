@@ -1,6 +1,7 @@
 // const conn = require('../mariadb');
 const mariadb = require('mysql2/promise');
 const { StatusCodes } = require('http-status-codes');
+const { ensureAuthorization } = require('../jwtAuthorization');
 
 const order = async (req, res) => {
     const conn = await mariadb.createConnection({
@@ -11,7 +12,9 @@ const order = async (req, res) => {
         dateStrings: true
     });
 
-    const { items, delivery, totalQuantity, totalPrice, userId, firstBookTitle } = req.body;
+    const authorization = ensureAuthorization(req);
+
+    const { items, delivery, totalQuantity, totalPrice, firstBookTitle } = req.body;
 
     // delivery 테이블 삽입
     let sql = `INSERT INTO delivery (address, receiver, contact) 
@@ -23,7 +26,7 @@ const order = async (req, res) => {
     // orders 테이블 삽입
     sql = `INSERT INTO orders (book_title, total_quantity, total_price, user_id, delivery_id) 
                 VALUES (?, ?, ?, ?, ?)`;
-    values = [firstBookTitle, totalQuantity, totalPrice, userId, deliveryId];
+    values = [firstBookTitle, totalQuantity, totalPrice, authorization.id, deliveryId];
     [results] = await conn.execute(sql, values);
     const orderId = results.insertId;
 
@@ -31,7 +34,7 @@ const order = async (req, res) => {
     sql = `SELECT book_id, quantity FROM cartItems WHERE id IN (?)`;
     const [orderItems, fields] = await conn.query(sql, [items]);
     if (!orderItems.length) {
-        res.status(StatusCodes.BAD_REQUEST).end();
+        return res.status(StatusCodes.BAD_REQUEST).end();
     }
 
     // orderedBook 테이블 삽입
@@ -64,12 +67,15 @@ const getOrders = async (req, res) => {
         dateStrings: true
     });
 
+    const authorization = ensureAuthorization(req);
+
     const sql = `SELECT orders.id, created_at, address, receiver, contact, 
                     book_title, total_quantity total_price
                     FROM orders
                     LEFT JOIN delivery
-                    ON delivery_id = delivery.id`;
-    const [results, fields] = await conn.query(sql);
+                    ON delivery_id = delivery.id
+                    WHERE user_id = ?`;
+    const [results, fields] = await conn.query(sql, authorization.id);
 
     if (results.length) {
         return res.status(StatusCodes.OK).json(results);
@@ -79,7 +85,8 @@ const getOrders = async (req, res) => {
 };
 
 const getOrderDetail = async (req, res) => {
-    const id = parseInt(req.params.id);
+    const orderId = parseInt(req.params.id);
+    // const authorization = ensureAuthorization(req);
 
     const conn = await mariadb.createConnection({
         host: 'localhost',
@@ -94,7 +101,8 @@ const getOrderDetail = async (req, res) => {
                     LEFT JOIN books
                     ON orderedBook.book_id = books.id
                     WHERE order_id = ?`;
-    const [results, fields] = await conn.query(sql, id);
+    const values = [orderId];
+    const [results, fields] = await conn.query(sql, values);
 
     if (results.length) {
         return res.status(StatusCodes.OK).json(results);

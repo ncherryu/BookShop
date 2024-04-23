@@ -37,8 +37,6 @@ const getCartItems = (req, res) => {
     if (selected && selected.length) {
         sql += ` AND cartItems.id IN (?)`;
         values.push(selected);
-    } else {
-        return res.status(StatusCodes.BAD_REQUEST).end();
     }
 
     conn.query(sql, values,

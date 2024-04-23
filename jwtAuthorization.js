@@ -7,9 +7,14 @@ dotenv.config();
 function ensureAuthorization(req) {
     try {
         const receivedJwt = req.headers['authorization'];
-        const decodedJwt = jwt.verify(receivedJwt, process.env.PRIVATE_KEY);
 
-        return decodedJwt;
+        if (receivedJwt) {
+            const decodedJwt = jwt.verify(receivedJwt, process.env.PRIVATE_KEY);
+            return decodedJwt;
+        } else {
+            throw new ReferenceError('jwt must be provided');
+        }
+
     } catch (err) {
         console.log(err.name);
         console.log(err.message);
@@ -27,6 +32,10 @@ function validateToken(req, res, next) {
     } else if (authorization instanceof jwt.JsonWebTokenError) {
         return res.status(StatusCodes.BAD_REQUEST).json({
             message: '잘못된 토큰입니다.'
+        });
+    } else if (authorization instanceof ReferenceError) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({
+            message: '로그인이 필요한 기능입니다.'
         });
     }
 
