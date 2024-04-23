@@ -8,9 +8,9 @@ const {
 } = require('../controller/UserController');
 const {
     emailValidate,
-    passwordValidate,
-    validate
+    passwordValidate
 } = require('../validator/UserValidator');
+const { validate } = require('../validator/validate');
 
 router.use(express.json());
 

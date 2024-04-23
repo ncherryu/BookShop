@@ -4,9 +4,9 @@ const { addToCart, getCartItems, removeCartItem } = require('../controller/CartC
 const {
     bookIdValidate,
     cartIdValidate,
-    quantityValidate,
-    validate
+    quantityValidate
 } = require('../validator/CartValidator');
+const { validate } = require('../validator/validate');
 const { validateToken } = require('../jwtAuthorization');
 
 router.use(express.json());
@@ -29,7 +29,7 @@ router.get(
 // 장바구니 도서 삭제
 router.delete(
     '/:id',
-    [cartIdValidate, validate],
+    [validateToken, cartIdValidate, validate],
     removeCartItem
 );
 

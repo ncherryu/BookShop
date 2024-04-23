@@ -7,9 +7,9 @@ const {
 const {
     limitValidate,
     currentPageValidate,
-    bookIdValidate,
-    validate
+    bookIdValidate
 } = require('../validator/BookValidator');
+const { validate } = require('../validator/validate');
 
 router.use(express.json());
 

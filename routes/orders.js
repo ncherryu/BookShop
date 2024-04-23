@@ -6,11 +6,11 @@ const {
     deliveryValidate,
     quantityValidate,
     priceValidate,
-    userIdValidate,
     bookTitleValidate,
-    orderIdValidate,
-    validate
+    orderIdValidate
 } = require('../validator/OrderValidator');
+const { validate } = require('../validator/validate');
+const { validateToken } = require('../jwtAuthorization');
 
 router.use(express.json());
 
@@ -18,21 +18,25 @@ router.use(express.json());
 router.post(
     '/',
     [
+        validateToken,
         itemsValidate, deliveryValidate,
         quantityValidate, priceValidate,
-        userIdValidate, bookTitleValidate,
-        validate
+        bookTitleValidate, validate
     ],
     order
 );
 
 // 주문 목록 조회
-router.get('/', getOrders);
+router.get(
+    '/',
+    [validateToken],
+    getOrders
+);
 
 // 주문 상세 조회
 router.get(
     '/:id',
-    [orderIdValidate, validate],
+    [validateToken, orderIdValidate, validate],
     getOrderDetail
 );
 
