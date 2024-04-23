@@ -1,17 +1,19 @@
-const { body, param, validationResult } = require('express-validator');
+const { body, param } = require('express-validator');
 
-const validate = (req, res, next) => {
-    const err = validationResult(req);
+const bookIdValidate = body('book_id')
+    .notEmpty()
+    .isInt()
+    .custom(value => value > 0)
+    .withMessage('책 id 필요');
+const cartIdValidate = param('id')
+    .notEmpty()
+    .isInt()
+    .custom(value => value > 0)
+    .withMessage('장바구니 아이템 id 필요');
+const quantityValidate = body('quantity')
+    .notEmpty()
+    .isInt()
+    .custom(value => value > 0)
+    .withMessage('수량 필요');
 
-    if (err.isEmpty()) {
-        return next();
-    } else {
-        return res.status(400).json(err.array());
-    }
-}
-
-const bookIdValidate = body('book_id').notEmpty().isInt().withMessage('책 id 필요');
-const cartIdValidate = param('id').notEmpty().isInt().withMessage('장바구니 아이템 id 필요');
-const quantityValidate = body('quantity').notEmpty().isInt().withMessage('수량 필요');
-
-module.exports = { bookIdValidate, cartIdValidate, quantityValidate, validate };
+module.exports = { bookIdValidate, cartIdValidate, quantityValidate };
