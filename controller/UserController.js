@@ -18,10 +18,13 @@ const join = (req, res) => {
         (err, results) => {
             if (err) {
                 console.log(err);
-                return res.status(StatusCodes.BAD_REQUEST).end(); // bad request
+                return res.status(StatusCodes.BAD_REQUEST).end();
             }
-
-            res.status(StatusCodes.CREATED).json(results);
+            if (results.affectedRows) {
+                res.status(StatusCodes.CREATED).json(results);
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).end();
+            }
         });
 };
 

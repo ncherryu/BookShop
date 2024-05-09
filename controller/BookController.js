@@ -39,6 +39,10 @@ const allBooks = (req, res) => {
             }
 
             if (results.length) {
+                results.forEach(result => {
+                    result.pubDate = result.pub_date;
+                    delete result.pub_date;
+                })
                 allBooksRes['books'] = results;
             } else {
                 return res.status(StatusCodes.NOT_FOUND).end();
