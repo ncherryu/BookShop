@@ -42,4 +42,13 @@ function validateToken(req, res, next) {
     return next();
 }
 
-module.exports = { ensureAuthorization, validateToken };
+function getLoginedId(req) {
+    const authorization = ensureAuthorization(req);
+    if (authorization.id) {
+        return authorization.id;
+    }
+
+    return false;
+}
+
+module.exports = { ensureAuthorization, validateToken, getLoginedId };
