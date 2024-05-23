@@ -25,12 +25,12 @@ Order.initiate(sequelize);
 User.initiate(sequelize);
 
 // associate 함수에서 관계 함수를 인식 못하는 오류 발생으로 관계는 여기에 작성
-Category.hasMany(Book);
-Book.belongsTo(Category);
-Book.hasMany(Like);
-Like.belongsTo(Book);
-User.hasMany(Like);
-Like.belongsTo(User);
+Category.hasMany(Book, { foreignKey: 'category_id' });
+Book.belongsTo(Category, { foreignKey: 'category_id' });
+Book.hasMany(Like, { foreignKey: 'liked_book_id' });
+Like.belongsTo(Book, { foreignKey: 'id' });
+User.hasMany(Like, { foreignKey: 'user_id' });
+Like.belongsTo(User, { foreignKey: 'id' });
 Book.hasMany(CartItem, { foreignKey: 'id', sourceKey: 'id' });
 CartItem.belongsTo(Book, { foreignKey: 'id', targetKey: 'id' });
 Order.belongsTo(Delivery, { foreignKey: 'delivery_id' });
