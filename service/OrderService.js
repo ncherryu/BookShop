@@ -72,7 +72,11 @@ const selectOrders = async (userId) => {
     try {
         const orders = await Order.findAll({
             attributes: [
-                'id', 'created_at', 'book_title', 'total_quantity', 'total_price'
+                ['id', 'id'],
+                ['created_at', 'createdAt'],
+                ['book_title', 'bookTitle'],
+                ['total_quantity', 'totalQuantity'],
+                ['total_price', 'totalPrice']
             ],
             include: [{
                 model: Delivery,
@@ -81,14 +85,22 @@ const selectOrders = async (userId) => {
             where: { user_id: userId }
         });
 
-        if (!orders.length) {
+        const ordersResult = orders.map((order) => {
+            const result = { ...order.dataValues, ...order.dataValues.Delivery.dataValues };
+            delete result.Delivery;
+
+            return result;
+        });
+
+
+        if (!ordersResult.length) {
             throw new CustomError(
                 '주문 내역이 없습니다.',
                 StatusCodes.NOT_FOUND
             );
         }
 
-        return orders;
+        return ordersResult;
     } catch (err) {
         throw new CustomError(
             err.message || '주문 내역 조회 실패',
@@ -101,21 +113,30 @@ const selectOrders = async (userId) => {
 const selectOrderDetail = async (orderId) => {
     try {
         const orderDetail = await OrderedBook.findAll({
-            attributes: ['book_id', 'quantity'],
+            attributes: [
+                ['book_id', 'bookId'], 'quantity'
+            ],
             include: [{
                 model: Book, attributes: ['title', 'author', 'price']
             }],
             where: { order_id: orderId }
         });
 
-        if (!orderDetail.length) {
+        const orderDetailResult = orderDetail.map((order) => {
+            const result = { ...order.dataValues, ...order.dataValues.Book.dataValues };
+            delete result.Book;
+
+            return result;
+        })
+
+        if (!orderDetailResult.length) {
             throw new CustomError(
                 '주문 상세 조회 결과가 없습니다.',
                 StatusCodes.BAD_REQUEST
             );
         }
 
-        return orderDetail;
+        return orderDetailResult;
     } catch (err) {
         throw new CustomError(
             err.message || '주문 내역 조회 실패',

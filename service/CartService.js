@@ -45,14 +45,23 @@ const getItemList = async (userId, selected) => {
             ]
         });
 
-        if (!itemList.length) {
+        const resultList = itemList.map((item) => {
+            return {
+                id: item.id,
+                bookId: item.book_id,
+                quantity: item.quantity,
+                ...item.Book.dataValues
+            }
+        });
+
+        if (!resultList.length) {
             throw new CustomError(
                 '조회 결과가 없습니다.',
                 StatusCodes.BAD_REQUEST
             );
         }
 
-        return itemList;
+        return resultList;
     } catch (err) {
         throw new CustomError(
             err.message || '장바구니 조회 실패',

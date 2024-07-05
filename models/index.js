@@ -32,7 +32,7 @@ Like.belongsTo(Book, { foreignKey: 'id' });
 User.hasMany(Like, { foreignKey: 'user_id' });
 Like.belongsTo(User, { foreignKey: 'id' });
 Book.hasMany(CartItem, { foreignKey: 'id', sourceKey: 'id' });
-CartItem.belongsTo(Book, { foreignKey: 'id', targetKey: 'id' });
+CartItem.belongsTo(Book, { foreignKey: 'book_id', targetKey: 'id' });
 Order.belongsTo(Delivery, { foreignKey: 'delivery_id' });
 Delivery.hasMany(Order, { foreignKey: 'id' });
 OrderedBook.belongsTo(Book, { foreignKey: 'book_id' });

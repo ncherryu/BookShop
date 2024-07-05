@@ -37,8 +37,7 @@ const getAllBooks = async ({
             orderCondition = [...orderCondition, [sort, 'DESC']];
         }
 
-
-        let allBooks = await Book.findAll({
+        let allBooks = await Book.findAndCountAll({
             attributes: {
                 include: [
                     [
@@ -57,79 +56,22 @@ const getAllBooks = async ({
             offset: offset
         });
 
-        if (!allBooks.length) {
+        if (!allBooks.count) {
             throw new CustomError(
                 '조회할 책이 없습니다.',
                 StatusCodes.NOT_FOUND
-            )
+            );
         }
 
         allBooks = {
-            books: [...allBooks],
+            books: allBooks.rows,
             pagination: {
                 currentPage: +current_page,
-                totalCount: allBooks.length
+                totalCount: allBooks.count
             }
         };
 
         return allBooks;
-
-
-
-        // const allBooksRes = {};
-        // const offset = limit * (current_page - 1);
-        // let allBooksSql = `SELECT SQL_CALC_FOUND_ROWS all_books.*
-        //                         FROM (SELECT *,
-        //                             (SELECT COUNT(*) FROM likes WHERE liked_book_id = books.id) AS likes,
-        //                             (SELECT COUNT(*) FROM orderedBook WHERE orderedBook.book_id = books.id) AS orders 
-        //                             FROM books) all_books `;
-        // let values = [];
-
-        // if (category_id && news) {
-        //     allBooksSql += `WHERE category_id = ? AND pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW() `;
-        //     values = [parseInt(category_id)];
-        // } else if (category_id) {
-        //     allBooksSql += `WHERE category_id = ? `;
-        //     values = [parseInt(category_id)];
-        // } else if (news) {
-        //     allBooksSql = `WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW() `
-        // }
-
-        // const orderList = ['likes', 'orders', 'pub_date'];
-        // if (orderList.find(e => e === sort)) {
-        //     allBooksSql += `ORDER BY all_books.${sort} DESC `;
-        // }
-
-        // allBooksSql += `LIMIT ? OFFSET ?`;
-        // values.push(parseInt(limit), offset);
-
-        // const allBooks = await sequelize.query(allBooksSql, {
-        //     replacements: values,
-        //     type: QueryTypes.SELECT
-        // })
-
-        // if (!allBooks.length) {
-        //     throw new CustomError(
-        //         '조회할 책이 없습니다.',
-        //         StatusCodes.NOT_FOUND
-        //     )
-        // }
-
-        // allBooksRes['books'] = allBooks;
-
-        // const totalCountSql = `SELECT found_rows()`;
-        // const totalCount = await sequelize.query(totalCountSql, {
-        //     type: QueryTypes.SELECT
-        // });
-
-        // const pagination = {};
-        // pagination['currentPage'] = parseInt(current_page);
-        // pagination['totalCount'] = totalCount[0]['found_rows()'];
-
-        // allBooksRes['pagination'] = pagination;
-
-        // return allBooksRes;
-
     } catch (err) {
         throw new CustomError(
             err.message || '책 목록을 조회할 수 없습니다.',
@@ -145,6 +87,10 @@ const getBookDetail = async (userId, bookId) => {
             [
                 sequelize.literal('(SELECT COUNT(*) FROM likes WHERE liked_book_id = Book.id)'),
                 'likes'
+            ],
+            [
+                sequelize.literal('(SELECT category_name FROM category WHERE category_id = Book.category_id)'),
+                'categoryName'
             ]
         ]
 
@@ -168,13 +114,6 @@ const getBookDetail = async (userId, bookId) => {
             attributes: {
                 include: attributesList
             },
-            include: [
-                {
-                    model: Category,
-                    as: ['category_name'],
-                    attributes: ['category_name']
-                }
-            ],
             where: {
                 id: bookId
             }
@@ -186,6 +125,9 @@ const getBookDetail = async (userId, bookId) => {
                 StatusCodes.NOT_FOUND
             );
         }
+
+        foundBook.dataValues['pubDate'] = foundBook.dataValues['pub_date'];
+        delete foundBook.dataValues.pub_date;
 
         return foundBook;
 

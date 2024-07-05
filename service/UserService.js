@@ -58,7 +58,7 @@ const createToken = (id, email) => {
         id: id,
         email: email
     }, process.env.PRIVATE_KEY, {
-        expiresIn: '30m',
+        expiresIn: '1d',
         issuer: 'minjin'
     });
 

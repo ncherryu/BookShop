@@ -3,6 +3,7 @@ const app = express();
 const dotenv = require('dotenv');
 const { StatusCodes } = require('http-status-codes');
 const { sequelize } = require('./models/index');
+const cors = require('cors');
 
 dotenv.config();
 
@@ -20,6 +21,11 @@ const connectDB = async () => {
         })
 }
 connectDB();
+
+app.use(cors({
+    origin: true,
+    credentials: true
+}))
 
 
 const userRouter = require('./routes/users');

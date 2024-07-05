@@ -16,7 +16,7 @@ const login = async (req, res, next) => {
         const { email, password } = req.body;
         const token = await loginUser(email, password);
         res.cookie('token', token, { httpOnly: true });
-        return res.status(StatusCodes.OK).json({ email });
+        return res.status(StatusCodes.OK).json({ email, token });
     } catch (err) {
         next(err);
     }
